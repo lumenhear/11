@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disorders Library | LUMEN Speech & Hearing Care</title>
+    <meta name="description" content="Comprehensive directory of speech, language, and hearing disorders with detailed information about symptoms, assessment, and treatment.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+    <!-- Header (same as index.html) -->
+    <header class="header">
+        <!-- Copy header from index.html -->
+    </header>
+
+    <!-- Disorders Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1 class="page-title fade-in">Disorders Library</h1>
+            <p class="page-subtitle fade-in">Comprehensive information on speech, language, and hearing disorders</p>
+        </div>
+    </section>
+
+    <!-- Search and Filter -->
+    <section class="disorders-search">
+        <div class="container">
+            <div class="search-box fade-in">
+                <input type="text" id="disorder-search" placeholder="Search disorders...">
+                <button type="button" id="search-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="filter-options fade-in">
+                <button class="filter-btn active" data-filter="all">All Disorders</button>
+                <button class="filter-btn" data-filter="speech">Speech Disorders</button>
+                <button class="filter-btn" data-filter="language">Language Disorders</button>
+                <button class="filter-btn" data-filter="hearing">Hearing Disorders</button>
+                <button class="filter-btn" data-filter="voice">Voice Disorders</button>
+                <button class="filter-btn" data-filter="fluency">Fluency Disorders</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Disorders Grid -->
+    <section class="disorders-library">
+        <div class="container">
+            <div id="disorders-grid" class="disorders-grid">
+                <!-- Disorders will be loaded dynamically from JSON -->
+            </div>
+            <div id="loading" class="loading-spinner"></div>
+            <div id="no-results" class="no-results" style="display: none;">
+                <h3>No disorders found matching your search</h3>
+                <p>Try adjusting your search terms or filters</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (same as index.html) -->
+    <footer class="footer">
+        <!-- Copy footer from index.html -->
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/disorders-data.js"></script>
+    <script>
+        // Disorders library functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const disordersGrid = document.getElementById('disorders-grid');
+            const searchInput = document.getElementById('disorder-search');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const loadingElement = document.getElementById('loading');
+            const noResultsElement = document.getElementById('no-results');
+            
+            let currentFilter = 'all';
+            let currentSearch = '';
+            
+            // Load and display disorders
+            function displayDisorders() {
+                loadingElement.style.display = 'block';
+                disordersGrid.innerHTML = '';
+                noResultsElement.style.display = 'none';
+                
+                // Simulate loading delay
+                setTimeout(() => {
+                    const filteredDisorders = window.disordersData.filter(disorder => {
+                        const matchesFilter = currentFilter === 'all' || disorder.category === currentFilter;
+                        const matchesSearch = disorder.name.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                                            disorder.description.toLowerCase().includes(currentSearch.toLowerCase());
+                        return matchesFilter && matchesSearch;
+                    });
+                    
+                    if (filteredDisorders.length === 0) {
+                        noResultsElement.style.display = 'block';
+                    } else {
+                        filteredDisorders.forEach(disorder => {
+                            const disorderCard = document.createElement('div');
+                            disorderCard.className = 'disorder-card fade-in';
+                            disorderCard.innerHTML = `
+                                <h3>${disorder.name}</h3>
+                                <p>${disorder.description}</p>
+                                <div class="disorder-category">${disorder.category}</div>
+                                <a href="disorder-detail.html?disorder=${disorder.id}" class="btn btn-outline">Learn More</a>
+                            `;
+                            disordersGrid.appendChild(disorderCard);
+                        });
+                        
+                        // Trigger scroll animations
+                        const observer = new IntersectionObserver((entries) => {
+                            entries.forEach(entry => {
+                                if (entry.isIntersecting) {
+                                    entry.target.classList.add('visible');
+                                }
+                            });
+                        }, { threshold: 0.1 });
+                        
+                        document.querySelectorAll('.disorder-card').forEach(card => {
+                            observer.observe(card);
+                        });
+                    }
+                    
+                    loadingElement.style.display = 'none';
+                }, 500);
+            }
+            
+            // Filter button events
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.getAttribute('data-filter');
+                    displayDisorders();
+                });
+            });
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                currentSearch = this.value;
+                displayDisorders();
+            });
+            
+            // Initial load
+            displayDisorders();
+        });
+    </script>
+</body>
+</html>
